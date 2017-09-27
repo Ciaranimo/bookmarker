@@ -1,54 +1,67 @@
 // Listen for form submit
-document.getElementById('bookmarkForm').addEventListener('submit',saveBookmark);
-// Save bookmark
+document.getElementById('bookmarkForm').addEventListener('submit', saveBookmark);
+
+// Save Bookmark
 function saveBookmark(e){
-  // get values
+  // Get form values
   var siteName =document.getElementById('siteName').value;
   var siteUrl =document.getElementById('siteUrl').value;
 
-  // bookmark object to save to local storage
+  if(!validateForm(siteName, siteUrl)){
+    return false;
+  }
+
   var bookmark = {
     name: siteName,
     url: siteUrl
   }
-  console.log(bookmark);
-  // test if bookmarks null
+
+  // Test if bookmarks is null
   if(localStorage.getItem('bookmarks') === null){
-      // Init array
-      var bookmarks = [];
-      // Add to array
-      bookmarks.push(bookmark);
-      // Set to localStorage
-      localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
-    }
-    else {
-      // Get bookmarks from localStorage
-      var bookmarks = JSON.parse(localStorage.getItem('bookmarks'));
-      // Add bookmark to array
-      bookmarks.push(bookmark);
-      // Re-set back to localStorage
-      localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+    // Init array
+    var bookmarks = [];
+    // Add to array
+    bookmarks.push(bookmark);
+    // Set to localStorage
+    localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+  } else {
+    // Get bookmarks from localStorage
+    var bookmarks = JSON.parse(localStorage.getItem('bookmarks'));
+    // Add bookmark to array
+    bookmarks.push(bookmark);
+    // Re-set back to localStorage
+    localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
   }
+
+  // Clear form
+  document.getElementById('bookmarkForm').reset();
+
+  // Re-get bookmarks
   getBookmarks();
 
-  //prevent form submit
+  // Prevent form from submitting
   e.preventDefault();
 }
 
+// Delete bookmark
 function deleteBookmark(url){
-  // get bookmarks from localStorage
+  // Get bookmarks from localStorage
   var bookmarks = JSON.parse(localStorage.getItem('bookmarks'));
-  for (var i = 0; i < bookmarks.length; i++) {
+  // Loop throught bookmarks
+  for(var i =0;i < bookmarks.length;i++){
     if(bookmarks[i].url == url){
-      //remove from array
+      // Remove from array
       bookmarks.splice(i, 1);
     }
   }
-  // re-set to localStorage
-  localStorage.setItem('bookmarks',JSON.stringify(bookmarks));
+  // Re-set back to localStorage
+  localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+
+  // Re-get bookmarks
   getBookmarks();
 }
 
+// get bookmarks
 function getBookmarks(){
   // Get bookmarks from localStorage
   var bookmarks = JSON.parse(localStorage.getItem('bookmarks'));
@@ -68,4 +81,22 @@ function getBookmarks(){
                                   '</h3>'+
                                   '</div>';
   }
+}
+
+// Validate Form
+function validateForm(siteName, siteUrl){
+  if(siteName == null || siteUrl == null){
+    alert('Please fill in the form');
+    return false;
+  }
+
+  var expression = /[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?/gi;
+  var regex = new RegExp(expression);
+
+  if(!siteUrl.match(regex)){
+    alert('Please use a valid URL');
+    return false;
+  }
+
+  return true;
 }
